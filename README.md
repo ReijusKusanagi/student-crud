@@ -57,3 +57,20 @@ npm.cmd run dev
 | `POST` | `/cruz/students` | Create new student |
 | `PUT` | `/cruz/students/{id}` | Update student by ID |
 | `DELETE` | `/cruz/students/{id}` | Delete student by ID |
+
+---
+
+## 🌐 Deployment to Render.com
+
+This repository is configured as an Infrastructure-as-Code Blueprint using [`render.yaml`](./render.yaml).
+
+### Deploy via Render Blueprints (Recommended):
+1. Push this repository to your GitHub account.
+2. Log into [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** and select **Blueprint**.
+4. Connect your `student-crud` repository.
+5. Render will automatically detect `render.yaml` and provision:
+   * **PostgreSQL Database**: `student-db` (Free plan)
+   * **Spring Boot Backend**: `student-backend` (Docker web service with connected database environment variables)
+   * **Vite React Frontend**: `student-frontend` (Static site with SPA rewrite rules)
+6. Click **Apply** to deploy!

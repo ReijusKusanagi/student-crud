@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @Controller
 @RequestMapping(path="/cruz/students")
 public class StudentController {
@@ -18,7 +19,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity createStudent(@RequestBody Student student) throws URISyntaxException {
         Student savedStudent = studentRepository.save(student);
-        return ResponseEntity.created(new URI("/students/" + savedStudent.getId())).body(savedStudent);
+        return ResponseEntity.created(new URI("/cruz/students/" + savedStudent.getId())).body(savedStudent);
     }
 
     @GetMapping
