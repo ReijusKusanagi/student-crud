@@ -1,13 +1,17 @@
-// Resolve API base URL dynamically
-export const getApiBaseUrl = () => {
-  // 1. Check if user configured a custom URL in the UI (stored in localStorage)
-  const storedUrl = typeof window !== 'undefined' ? localStorage.getItem('student_api_url') : null;
-  if (storedUrl && storedUrl.trim()) {
-    const clean = storedUrl.trim().replace(/\/+$/, '');
-    return clean.endsWith('/cruz/students') ? clean : `${clean}/cruz/students`;
-  }
+// Fixed API base URL pointing directly to the deployed Render backend
+export const DEFAULT_API_BASE_URL = 'https://student-backend-flu6.onrender.com/cruz/students';
 
-  // 2. Check environment variable injected at build time (VITE_API_BASE_URL)
+// Clean up any previously stored dynamic URL from localStorage
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('student_api_url');
+  } catch (e) {
+    // Ignore storage errors if disabled
+  }
+}
+
+// Get the backend API base URL
+export const getApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim()) {
     let clean = envUrl.trim().replace(/\/+$/, '');
@@ -17,20 +21,7 @@ export const getApiBaseUrl = () => {
     return clean.endsWith('/cruz/students') ? clean : `${clean}/cruz/students`;
   }
 
-  // 3. Local development proxy fallback
-  return '/cruz/students';
-};
-
-export const setCustomApiUrl = (url) => {
-  if (!url || !url.trim()) {
-    localStorage.removeItem('student_api_url');
-  } else {
-    let clean = url.trim().replace(/\/+$/, '');
-    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
-      clean = `https://${clean}`;
-    }
-    localStorage.setItem('student_api_url', clean);
-  }
+  return DEFAULT_API_BASE_URL;
 };
 
 export const studentApi = {

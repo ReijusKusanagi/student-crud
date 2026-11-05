@@ -3,8 +3,8 @@ import Navbar from './components/Navbar';
 import StudentForm from './components/StudentForm';
 import StudentTable from './components/StudentTable';
 import Toast from './components/Toast';
-import { studentApi, getApiBaseUrl, setCustomApiUrl } from './api/studentApi';
-import { Users, GraduationCap, Layers, Server, Settings, Check } from 'lucide-react';
+import { studentApi, getApiBaseUrl } from './api/studentApi';
+import { Users, GraduationCap, Layers, Server } from 'lucide-react';
 
 const initialFormData = {
   id: null,
@@ -23,11 +23,6 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [backendConnected, setBackendConnected] = useState(true);
 
-  // Dynamic API configuration
-  const [apiUrl, setApiUrl] = useState(getApiBaseUrl());
-  const [showConfig, setShowConfig] = useState(false);
-  const [inputUrl, setInputUrl] = useState('');
-
   const formRef = useRef(null);
 
   // Load students from backend
@@ -40,7 +35,7 @@ export default function App() {
     } catch (err) {
       console.error('Fetch students error:', err);
       setBackendConnected(false);
-      showToast('error', 'Connection Error', `Could not reach ${getApiBaseUrl()}. Please verify your backend URL.`);
+      showToast('error', 'Connection Error', `Could not reach ${getApiBaseUrl()}. Please verify your backend is active.`);
     } finally {
       setIsLoading(false);
     }
@@ -49,14 +44,6 @@ export default function App() {
   useEffect(() => {
     fetchStudents();
   }, []);
-
-  const handleSaveApiUrl = (e) => {
-    e.preventDefault();
-    setCustomApiUrl(inputUrl);
-    setApiUrl(getApiBaseUrl());
-    setShowConfig(false);
-    fetchStudents();
-  };
 
   const showToast = (type, title, message) => {
     setToast({ type, title, message });
@@ -146,7 +133,7 @@ export default function App() {
       <Navbar studentCount={students.length} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        {/* Connection status banner & configuration */}
+        {/* Connection status banner */}
         {!backendConnected && (
           <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -155,22 +142,12 @@ export default function App() {
                 <div>
                   <p className="font-semibold text-sm">Cannot reach backend API</p>
                   <p className="text-xs text-amber-700 font-mono mt-0.5">
-                    Target URL: <span className="font-bold underline">{apiUrl}</span>
+                    Target URL: <span className="font-bold underline">{getApiBaseUrl()}</span>
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => {
-                    setInputUrl(apiUrl);
-                    setShowConfig(!showConfig);
-                  }}
-                  className="text-xs font-semibold px-3 py-1.5 bg-amber-100 text-amber-800 rounded-xl hover:bg-amber-200 transition-colors cursor-pointer flex items-center space-x-1"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Configure API URL</span>
-                </button>
                 <button
                   onClick={fetchStudents}
                   className="text-xs font-semibold px-3 py-1.5 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors cursor-pointer"
@@ -179,26 +156,6 @@ export default function App() {
                 </button>
               </div>
             </div>
-
-            {/* In-page API URL configuration form (No modal) */}
-            {showConfig && (
-              <form onSubmit={handleSaveApiUrl} className="mt-4 pt-3 border-t border-amber-200/80 flex flex-col sm:flex-row gap-2">
-                <input
-                  type="text"
-                  value={inputUrl}
-                  onChange={(e) => setInputUrl(e.target.value)}
-                  placeholder="https://your-backend-name.onrender.com"
-                  className="flex-1 px-3 py-1.5 text-xs bg-white border border-amber-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-                <button
-                  type="submit"
-                  className="px-3.5 py-1.5 text-xs font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center space-x-1"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Save URL</span>
-                </button>
-              </form>
-            )}
           </div>
         )}
 
