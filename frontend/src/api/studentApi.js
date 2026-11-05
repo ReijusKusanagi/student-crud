@@ -1,26 +1,43 @@
-// Resolve API base URL based on environment (Render production vs local dev)
-const getApiBaseUrl = () => {
-  const envUrl = import.meta.env.VITE_API_BASE_URL;
+// Resolve API base URL dynamically
+export const getApiBaseUrl = () => {
+  // 1. Check if user configured a custom URL in the UI (stored in localStorage)
+  const storedUrl = typeof window !== 'undefined' ? localStorage.getItem('student_api_url') : null;
+  if (storedUrl && storedUrl.trim()) {
+    const clean = storedUrl.trim().replace(/\/+$/, '');
+    return clean.endsWith('/cruz/students') ? clean : `${clean}/cruz/students`;
+  }
 
+  // 2. Check environment variable injected at build time (VITE_API_BASE_URL)
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
   if (envUrl && envUrl.trim()) {
     let clean = envUrl.trim().replace(/\/+$/, '');
-    // If only service name provided (e.g. "student-backend")
     if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
       clean = clean.includes('.') ? `https://${clean}` : `https://${clean}.onrender.com`;
     }
-    return `${clean}/cruz/students`;
+    return clean.endsWith('/cruz/students') ? clean : `${clean}/cruz/students`;
   }
 
-  // Local development fallback (proxied by Vite)
+  // 3. Local development proxy fallback
   return '/cruz/students';
 };
 
-const BASE_URL = getApiBaseUrl();
+export const setCustomApiUrl = (url) => {
+  if (!url || !url.trim()) {
+    localStorage.removeItem('student_api_url');
+  } else {
+    let clean = url.trim().replace(/\/+$/, '');
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = `https://${clean}`;
+    }
+    localStorage.setItem('student_api_url', clean);
+  }
+};
 
 export const studentApi = {
   // Fetch all students
   async getAll() {
-    const res = await fetch(BASE_URL, {
+    const url = getApiBaseUrl();
+    const res = await fetch(url, {
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) {
@@ -31,7 +48,8 @@ export const studentApi = {
 
   // Fetch student by id
   async getById(id) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const url = getApiBaseUrl();
+    const res = await fetch(`${url}/${id}`, {
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) {
@@ -42,7 +60,8 @@ export const studentApi = {
 
   // Create new student
   async create(studentData) {
-    const res = await fetch(BASE_URL, {
+    const url = getApiBaseUrl();
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +78,8 @@ export const studentApi = {
 
   // Update existing student
   async update(id, studentData) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const url = getApiBaseUrl();
+    const res = await fetch(`${url}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +96,8 @@ export const studentApi = {
 
   // Delete student
   async delete(id) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const url = getApiBaseUrl();
+    const res = await fetch(`${url}/${id}`, {
       method: 'DELETE',
     });
     if (!res.ok) {
